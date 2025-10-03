@@ -74,3 +74,58 @@ TEST_CASE("Example: Print Prompt Ledger", "[ex-3]") {
   atm.PrintLedger("./prompt.txt", 12345678, 1234);
   REQUIRE(CompareFiles("./ex-1.txt", "./prompt.txt"));
 }
+
+TEST_CASE("Example: Same Input", "[ex-4]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Example: Negative Withdraw", "[ex-5]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.WithdrawCash(12345678, 1234, -40.00),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Example: No Account Exists", "[ex-6]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.WithdrawCash(234577, 1234, 40.00),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Example: Negative Balance", "[ex-7]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.WithdrawCash(12345678, 1234, 400.00),
+                    std::runtime_error);
+}
+
+TEST_CASE("Example: Deposit Negative Cash", "[ex-8]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.DepositCash(12345678, 1234, -40.00),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Example: Deposit No Account", "[ex-9]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.DepositCash(45678, 1234, 40.00), std::invalid_argument);
+}
+
+TEST_CASE("Example: Deposit Addition", "[ex-9]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  atm.DepositCash(12345678, 1234, 40.00);
+  REQUIRE(atm.CheckBalance(12345678, 1234) == 340.30);
+}
+
+TEST_CASE("Example: Ledger", "[ex-10]") {
+  Atm atm;
+  atm.RegisterAccount(12345678, 1234, "Sam Sepiol", 300.30);
+  REQUIRE_THROWS_AS(atm.PrintLedger("./prompt.txt", 12678, 124),
+                    std::invalid_argument);
+}

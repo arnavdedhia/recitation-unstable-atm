@@ -40,6 +40,9 @@ void Atm::RegisterAccount(unsigned int card_num,
                           unsigned int pin,
                           const std::string& owner_name,
                           double balance) {
+  if (stored_accounts_.contains({card_num, pin})) {
+    throw std::invalid_argument("Invalid Account Number");
+  }
   Account new_account = {owner_name, balance};
   stored_accounts_[{card_num, pin}] = new_account;
   account_transactions_[{card_num, pin}] = {};
@@ -50,6 +53,9 @@ void Atm::WithdrawCash(unsigned int card_num, unsigned int pin, double amount) {
     throw std::invalid_argument("Invalid Card Number/PIN");
   }
   Account& account = stored_accounts_[{card_num, pin}];
+  if (amount < 0) {
+    throw std::invalid_argument("Cannot withdraw a negative amount");
+  }
   if (account.balance - amount >= 0) {
     account.balance -= amount;
     account_transactions_[{card_num, pin}].push_back(
@@ -66,7 +72,7 @@ void Atm::DepositCash(unsigned int card_num, unsigned int pin, double amount) {
   if (amount < 0) {
     throw std::invalid_argument("Cannot deposit a negative amount");
   }
-  Account account = stored_accounts_[{card_num, pin}];
+  Account& account = stored_accounts_[{card_num, pin}];
   account.balance += amount;
   account_transactions_[{card_num, pin}].push_back(
       CreateTransactionRecord("Deposit", amount, account.balance));
@@ -75,6 +81,9 @@ void Atm::DepositCash(unsigned int card_num, unsigned int pin, double amount) {
 void Atm::PrintLedger(const std::string& file_path,
                       unsigned int card_num,
                       unsigned int pin) {
+  if (!stored_accounts_.contains({card_num, pin})) {
+    throw std::invalid_argument("Invalid Card Number/PIN");
+  }
   std::ofstream ofs{file_path};
   const Account& account = stored_accounts_[{card_num, pin}];
   const std::vector<std::string>& transactions =
